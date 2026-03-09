@@ -16,11 +16,11 @@ def describe_member_directory():
         resp = client.get(reverse("member_directory"))
         assert resp.status_code == 302
 
-    def it_returns_403_for_user_without_member_record(client: Client):
+    def it_returns_200_for_user_without_member_record(client: Client):
         user = UserFactory()
         client.force_login(user)
         resp = client.get(reverse("member_directory"))
-        assert resp.status_code == 403
+        assert resp.status_code == 200
 
     def it_returns_200_for_active_member(client: Client):
         user = UserFactory()
@@ -40,12 +40,12 @@ def describe_member_directory():
         assert active in members
         assert all(m.status == Member.Status.ACTIVE for m in members)
 
-    def it_returns_403_for_former_member(client: Client):
+    def it_returns_200_for_former_member(client: Client):
         user = UserFactory()
         MemberFactory(user=user, status=Member.Status.FORMER)
         client.force_login(user)
         resp = client.get(reverse("member_directory"))
-        assert resp.status_code == 403
+        assert resp.status_code == 200
 
 
 def describe_profile_edit():
@@ -55,6 +55,13 @@ def describe_profile_edit():
 
     def it_returns_403_for_user_without_member_record(client: Client):
         user = UserFactory()
+        client.force_login(user)
+        resp = client.get(reverse("profile_edit"))
+        assert resp.status_code == 403
+
+    def it_returns_403_for_former_member(client: Client):
+        user = UserFactory()
+        MemberFactory(user=user, status=Member.Status.FORMER)
         client.force_login(user)
         resp = client.get(reverse("profile_edit"))
         assert resp.status_code == 403
